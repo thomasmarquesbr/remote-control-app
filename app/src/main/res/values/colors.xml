@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#009353</color>
+    <color name="colorPrimaryDark">#006c3d</color>
+    <color name="colorAccent">#931400</color>
+
+    <!-- Background Color -->
+    <color name="shamrockGreen">#009353</color>
+    <color name="darkShamrockGreen">#006c3d</color>
+
+    <!-- Buttons -->
+    <color name="red">#e74c3c</color><!-- Alizarin -->
+    <color name="darkRed">#e02e1c</color>
+    <color name="blue">#2980b9</color><!-- BelizeHole -->
+    <color name="darkBlue">#226a99</color>
+    <color name="green">#2ecc71</color><!-- Emerland -->
+    <color name="darkGreen">#27ac5f</color>
+    <color name="yellow">#f1c40f</color><!-- Sunflower -->
+    <color name="darkYellow">#cda60c</color>
+</resources>
