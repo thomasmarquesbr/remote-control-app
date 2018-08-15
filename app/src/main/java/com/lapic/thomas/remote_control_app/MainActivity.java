@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity
     private ActionBarDrawerToggle actionBarDrawerToggle;
     private SeekBar seekBarVolume;
     private SeekBar seekBarPlayer;
+    private UDPConnection udpConnection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +106,11 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
     private void setConfigDrawer() {
         actionBarDrawerToggle = new ActionBarDrawerToggle(
                 this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -118,12 +124,12 @@ public class MainActivity extends AppCompatActivity
     private void setConfigBottomNavigation() {
         AHBottomNavigationItem item1 = new AHBottomNavigationItem(R.string.main, R.drawable.ic_tv, R.color.shamrockGreen);
         AHBottomNavigationItem item2 = new AHBottomNavigationItem(R.string.linear_tv, R.drawable.ic_list, R.color.shamrockGreen);
-        AHBottomNavigationItem item3 = new AHBottomNavigationItem(R.string.on_demand, R.drawable.ic_ondemand, R.color.shamrockGreen);
-        AHBottomNavigationItem item4 = new AHBottomNavigationItem(R.string.input, R.drawable.ic_mouse,R.color.shamrockGreen);
+//        AHBottomNavigationItem item3 = new AHBottomNavigationItem(R.string.on_demand, R.drawable.ic_ondemand, R.color.shamrockGreen);
+//        AHBottomNavigationItem item4 = new AHBottomNavigationItem(R.string.input, R.drawable.ic_mouse,R.color.shamrockGreen);
         bottomNavigation.addItem(item1);
         bottomNavigation.addItem(item2);
-        bottomNavigation.addItem(item3);
-        bottomNavigation.addItem(item4);
+//        bottomNavigation.addItem(item3);
+//        bottomNavigation.addItem(item4);
 
 //        bottomNavigation.setForceTitlesHide(true);
         bottomNavigation.setColored(true);
@@ -167,14 +173,16 @@ public class MainActivity extends AppCompatActivity
     public void openDialogSetttingIp() {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
         final EditText edittext = new EditText(this);
-        edittext.addTextChangedListener(MaskEditUtil.mask(edittext, "###.###.###.###:####"));
-        edittext.setInputType(InputType.TYPE_CLASS_NUMBER);
+//        edittext.addTextChangedListener(MaskEditUtil.mask(edittext, "###.###.###.###:####"));
+//        edittext.setInputType(InputType.TYPE_CLASS_NUMBER);
+        edittext.setText("10.5.18.161:9500");
         alert.setMessage(R.string.settings_message);
         alert.setTitle(R.string.action_settings);
         alert.setView(edittext);
         alert.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 String textValue = edittext.getText().toString();
+                udpConnection = new UDPConnection(textValue);
             }
         });
         alert.setNegativeButton(R.string.cancel, null);
@@ -192,18 +200,19 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void onClickButton(View view) {
-        Toast.makeText(this, "Clicou em " + getId(view), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Clicou em \"" + getId(view) + "\" com código: " + view.getTag(), Toast.LENGTH_SHORT).show();
+        int code = Integer.parseInt(String.valueOf(view.getTag()));
+        if (udpConnection != null) {
+            String paramsSended = udpConnection.sendMessage(code);
+            Toast.makeText(this, paramsSended, Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-    }
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}
 
     @Override
-    public void onStartTrackingTouch(SeekBar seekBar) {
-
-    }
+    public void onStartTrackingTouch(SeekBar seekBar) {}
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
