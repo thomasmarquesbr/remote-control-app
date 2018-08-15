@@ -90,7 +90,7 @@
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:id="@+id/ib_info"
-        android:tag="21"
+        android:tag="10"
         android:background="@drawable/circle_button"
         android:onClick="onClickButton"
         app:srcCompat="@drawable/ic_info"

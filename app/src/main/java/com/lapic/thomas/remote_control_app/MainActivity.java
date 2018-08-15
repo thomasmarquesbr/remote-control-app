@@ -23,6 +23,9 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationViewPager;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -39,6 +42,7 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.view_pager) protected AHBottomNavigationViewPager viewPager;
     @BindView(R.id.bottom_navigation) protected AHBottomNavigation bottomNavigation;
 
+    private PreferencesHelper mPrefHelper;
     private RCViewPagerAdapter rcViewPagerAdapter;
     private RCViewFragment currentFragment;
     private ActionBarDrawerToggle actionBarDrawerToggle;
@@ -55,6 +59,7 @@ public class MainActivity extends AppCompatActivity
 
         setConfigDrawer();
         setConfigBottomNavigation();
+        mPrefHelper = new PreferencesHelper(this);
     }
 
     @Override
@@ -109,6 +114,20 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStop() {
         super.onStop();
+        if (udpConnection != null) {
+            udpConnection.resetSeqNum();
+            udpConnection.disconnect();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+//        udpConnection = new UDPConnection()
+        if (mPrefHelper.getIp() != null && mPrefHelper.getPort() != -1) {
+            udpConnection = new UDPConnection(this);
+            udpConnection.connect();
+        }
     }
 
     private void setConfigDrawer() {
@@ -173,16 +192,26 @@ public class MainActivity extends AppCompatActivity
     public void openDialogSetttingIp() {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
         final EditText edittext = new EditText(this);
-//        edittext.addTextChangedListener(MaskEditUtil.mask(edittext, "###.###.###.###:####"));
-//        edittext.setInputType(InputType.TYPE_CLASS_NUMBER);
-        edittext.setText("10.5.18.161:9500");
+//        if (mPrefHelper.getIp() == null && mPrefHelper.getPort() == -1) {
+//            edittext.addTextChangedListener(MaskEditUtil.mask(edittext, "###.###.###.###:####"));
+//            edittext.setInputType(InputType.TYPE_CLASS_NUMBER);
+        if (mPrefHelper.getIp() != null && mPrefHelper.getPort() != -1) {
+            edittext.setText(mPrefHelper.getIp()+":"+mPrefHelper.getPort());
+        }
         alert.setMessage(R.string.settings_message);
         alert.setTitle(R.string.action_settings);
         alert.setView(edittext);
         alert.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 String textValue = edittext.getText().toString();
-                udpConnection = new UDPConnection(textValue);
+                if (textValue.isEmpty()) {
+                    mPrefHelper.clear();
+                } else {
+                    mPrefHelper.putIp(textValue.substring(0, textValue.indexOf(":")));
+                    mPrefHelper.putPort(Integer.parseInt(textValue.substring(textValue.lastIndexOf(":") + 1)));
+                    udpConnection = new UDPConnection(MainActivity.this);
+                    udpConnection.connect();
+                }
             }
         });
         alert.setNegativeButton(R.string.cancel, null);
@@ -201,10 +230,15 @@ public class MainActivity extends AppCompatActivity
 
     public void onClickButton(View view) {
         Toast.makeText(this, "Clicou em \"" + getId(view) + "\" com código: " + view.getTag(), Toast.LENGTH_SHORT).show();
-        int code = Integer.parseInt(String.valueOf(view.getTag()));
+        String code = String.valueOf(view.getTag());
         if (udpConnection != null) {
-            String paramsSended = udpConnection.sendMessage(code);
-            Toast.makeText(this, paramsSended, Toast.LENGTH_LONG).show();
+            try {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("keyCode", code);
+                udpConnection.sendKey(jsonObject.toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
